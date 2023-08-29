@@ -21,14 +21,14 @@
                             <div class="btn-group btn-group-toggle float-right" data-toggle="buttons">
                                 <label class="btn btn-sm btn-primary btn-simple active" id="0">
                                     <input type="radio" name="options" checked>
-                                    <span class="d-none d-sm-block d-md-block d-lg-block d-xl-block">A 구역</span>
+                                    <span class="d-none d-sm-block d-md-block d-lg-block d-xl-block">구역 A</span>
                                     <span class="d-block d-sm-none">
                                         <i class="tim-icons icon-single-02"></i>
                                     </span>
                                 </label>
                                 <label class="btn btn-sm btn-primary btn-simple" id="1">
                                     <input type="radio" class="d-none d-sm-none" name="options">
-                                    <span class="d-none d-sm-block d-md-block d-lg-block d-xl-block">B 구역</span>
+                                    <span class="d-none d-sm-block d-md-block d-lg-block d-xl-block">구역 B</span>
                                     <span class="d-block d-sm-none">
                                         <i class="tim-icons icon-gift-2"></i>
                                     </span>
@@ -59,7 +59,7 @@
             <div class="card card-chart">
                 <div class="card-header">
                     <h5 class="card-category">Warning Count</h5>
-                    <h3 class="card-title"><i class="tim-icons icon-bell-55 text-primary"></i>이상 현상 횟수: 5</h3>
+                    <h3 class="card-title"><i class="tim-icons icon-bell-55 text-primary"></i>이상 현상 횟수</h3>
                 </div>
                 <div class="card-body">
                     <div class="chart-area">
@@ -72,7 +72,7 @@
             <div class="card card-chart">
                 <div class="card-header">
                     <h5 class="card-category">Site Status</h5>
-                    <h3 class="card-title"><i class="tim-icons icon-bullet-list-67 text-info"></i>초당 120개 데이터 수집 중</h3>
+                    <h3 class="card-title"><i class="tim-icons icon-bullet-list-67 text-info"></i>120개 데이터 수집 중</h3>
                 </div>
                 <div class="card-body">
                     <div class="chart-area">
@@ -316,8 +316,8 @@
         </div>
         -->
     </div>
-    <button class="btn btn-primary alert-danger plus" onclick="demo.getSectorAData();">A</button>
-    <button class="btn btn-primary alert-danger plus" onclick="demo.showSectorB('top','right');">B</button>
+    <button class="btn btn-primary alert-danger plus" onclick="demo.sectorNoti('A');">A</button>
+    <button class="btn btn-primary alert-danger plus" onclick="demo.sectorNoti('B');">B</button>
 </div>
 
 {% endblock content %}
@@ -333,9 +333,13 @@
 
     // getSectorAData를 1초마다 실행
     setInterval(function () {
-        demo.getSectorAData();
-        demo.getSectorBData();
+        demo.getSectorData();
     }, 1000);
+
+    setInterval(function () {
+        demo.getSectorAPredict();
+        demo.getSectorBPredict();
+    }, 10000);
 
 </script>
 

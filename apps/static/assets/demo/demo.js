@@ -1,15 +1,79 @@
 type = ['primary', 'info', 'success', 'warning', 'danger'];
 sectorA = [];
 sectorB = [];
+var myLatlng = new google.maps.LatLng(37.402887, 127.100100);
+amount = [0, 40, 0, 0, 0, 0];
+
+/*
+[ 0.09055595 0.38549864 -0.10001237 0.17136654 0.37429774 -0.00075923]
+[ 0.10646203 0.40259898 0.02208492 0.32116342 0.48686996 -0.00439825]
+[ 0.09055471 0.3854981 -0.10001568 0.17136341 0.37429392 -0.00075924]
+[ 0.09055508 0.38549826 -0.10001469 0.17136434 0.37429506 -0.00075923]
+[ 0.09056035 0.3855005 -0.1000007 0.17137758 0.37431115 -0.00075919]
+[ 0.09055471 0.3854981 -0.10001568 0.17136341 0.37429392 -0.00075924]
+[ 0.09055481 0.38549817 -0.1000154 0.17136367 0.37429425 -0.00075924]
+
+해당 데이터의 근처 값이 반환되면 이상 감지로 판단한다. 그리고 alert(경고)를 출력한다.
+*/
+
 
 demo = {
-  getSectorAData: function () {
+  getSectorAPredict: function () {
     $.ajax({
-      url: "https://api.ye0ngjae.com/data",
+      url: `http://127.0.0.1:9002/predict?v=${sectorA[sectorA.length - 1].vibration}&s=${sectorA[sectorA.length - 1].sound}&w=${sectorA[sectorA.length - 1].WaterPressure}`,
+      type: "GET",
+      success: function (data) {
+        data = data.split(" ").filter((value) => value != "");
+        // 첫번째 인덱스 삭제
+        data.shift();
+        // data를 리스트로 변환
+        data = data.map((value) => parseFloat(value));
+
+        console.log(`Sector A: ${data}`);
+        //만약 data가 [ 0.09055595 0.38549864 -0.10001237 0.17136654 0.37429774 -0.00075923] 값과 근처 값이라면 이상 감지로 판단한다.
+        if ((data[0] >= 0.09 && data[0] <= 0.11) &&
+          (data[1] >= 0.38 && data[1] <= 0.41) &&
+          (data[2] >= -0.11 && data[2] <= -0.09) &&
+          (data[3] >= 0.16 && data[3] <= 0.18) &&
+          (data[4] >= 0.37 && data[4] <= 0.39) &&
+          (data[5] >= -0.0008 && data[5] <= -0.0007)) {
+          demo.sectorNoti("A");
+        }
+      },
+    });
+  },
+
+  getSectorBPredict: function () {
+    $.ajax({
+      url: `http://127.0.0.1:9002/predict?v=${sectorB[sectorB.length - 1].vibration}&s=${sectorB[sectorB.length - 1].sound}&w=${sectorB[sectorB.length - 1].WaterPressure}`,
+      type: "GET",
+      success: function (data) {
+        data = data.split(" ").filter((value) => value != "");
+        // 첫번째 인덱스 삭제
+        data.shift();
+        // data를 리스트로 변환
+        data = data.map((value) => parseFloat(value));
+
+        console.log(`Sector B: ${data}`);
+        //만약 data가 [ 0.09055595 0.38549864 -0.10001237 0.17136654 0.37429774 -0.00075923] 값과 근처 값이라면 이상 감지로 판단한다.
+        if ((data[0] >= 0.09 && data[0] <= 0.11) &&
+          (data[1] >= 0.38 && data[1] <= 0.41) &&
+          (data[2] >= -0.11 && data[2] <= -0.09) &&
+          (data[3] >= 0.16 && data[3] <= 0.18) &&
+          (data[4] >= 0.37 && data[4] <= 0.39) &&
+          (data[5] >= -0.0008 && data[5] <= -0.0007)) {
+          demo.sectorNoti("B");
+        }
+      },
+    });
+  },
+
+  getSectorData: function () {
+    $.ajax({
+      url: "https://gist.githubusercontent.com/GreenScreen410/b458d9c5f1c5933a5a4a6c0e95a5f757/raw/bf4f33ea065d106c5dcb182364e357ec4d1c42e4/gistfile1.txt",
       type: "GET",
       dataType: "json",
       success: function (data) {
-        console.log(data);
         for (var i = data.length - 120; i < data.length; i++) {
           if (data[i].site == "1") {
             for (var j = 0; j < sectorA.length; j++) {
@@ -18,21 +82,7 @@ demo = {
               }
             }
             sectorA.push(data[i]);
-          }
-        }
-      },
-    });
-  },
-
-  getSectorBData: function () {
-    $.ajax({
-      url: "https://api.ye0ngjae.com/data",
-      type: "GET",
-      dataType: "json",
-      success: function (data) {
-        console.log(data);
-        for (var i = data.length - 120; i < data.length; i++) {
-          if (data[i].site == "2") {
+          } else if (data[i].site == "2") {
             for (var j = 0; j < sectorB.length; j++) {
               if (sectorB[j].id == data[i].id) {
                 sectorB.splice(j, 1);
@@ -43,6 +93,22 @@ demo = {
         }
       },
     });
+  },
+
+
+  getSectorBData: function () {
+    /*
+    $.ajax({
+      url: "https://api.ye0ngjae.com/data",
+      type: "GET",
+      dataType: "json",
+      success: function (data) {
+        for (var i = data.length - 120; i < data.length; i++) {
+
+        }
+      },
+    });
+    */
   },
 
 
@@ -152,6 +218,11 @@ demo = {
   },
 
   initDashboardPageCharts: function () {
+    // myChart를 10초마다 업데이트한다.
+    setInterval(function () {
+      myChart.data.datasets[0].data = amount;
+      myChart.update();
+    }, 1000);
 
     gradientChartOptionsConfigurationWithTooltipBlue = {
       maintainAspectRatio: false,
@@ -416,7 +487,7 @@ demo = {
         pointHoverRadius: 4,
         pointHoverBorderWidth: 15,
         pointRadius: 4,
-        data: [0, 40, 0, 0, 0, 0],
+        data: amount,
       }]
     };
 
@@ -425,6 +496,7 @@ demo = {
       data: data,
       options: gradientChartOptionsConfigurationWithTooltipPurple
     });
+
 
 
     var ctxGreen = document.getElementById("chartLineGreen").getContext("2d");
@@ -456,11 +528,12 @@ demo = {
       }]
     };
 
-    var myChart = new Chart(ctxGreen, {
+    var myCharttt = new Chart(ctxGreen, {
       type: 'line',
       data: data,
       options: gradientChartOptionsConfigurationWithTooltipGreen
     });
+
 
     // -----------------------------------------------------------------------
 
@@ -700,8 +773,14 @@ demo = {
     */
 
     setInterval(function () {
+      var now = new Date();
+      var hours = now.getHours().toString().padStart(2, '0');
+      var minutes = now.getMinutes().toString().padStart(2, '0');
+      var seconds = now.getSeconds().toString().padStart(2, '0');
+      var time = `${hours}:${minutes}:${seconds}`;
       chart_labels.shift();
-      chart_labels.push(chart_labels[chart_labels.length - 1]);
+      chart_labels.push(time);
+
       sectorA_chart_data[0].shift();
       sectorA_chart_data[0].push(sectorA[sectorA.length - 1].vibration)
       sectorA_chart_data[1].shift();
@@ -730,7 +809,7 @@ demo = {
     gradientStroke.addColorStop(0.4, 'rgba(29,140,248,0.0)');
     gradientStroke.addColorStop(0, 'rgba(29,140,248,0)'); //blue colors
 
-    var myChart = new Chart(ctx, {
+    var myChartt = new Chart(ctx, {
       type: 'bar',
       responsive: true,
       legend: {
@@ -757,11 +836,12 @@ demo = {
   // -----------------------------------------------------------------------
 
   initGoogleMaps: function () {
-    var myLatlng = new google.maps.LatLng(37.402887, 127.100100);
     var mapOptions = {
       zoom: 15,
       center: myLatlng,
       scrollwheel: false, //we disable de scroll over the map, it is a really annoing when you scroll through page
+      // 이동 금지
+      draggable: false,
       /*
       styles: [{
         "elementType": "geometry",
@@ -1004,4 +1084,20 @@ demo = {
     });
     marker.setMap(map);
   },
+
+  sectorNoti: function (sector) {
+    var audio = new Audio("../static/assets/alarm.mp3");
+    audio.play();
+
+    amount[1] += 1;
+
+    $.notify({
+      icon: "tim-icons icon-bell-55",
+      message: `구역 ${sector} - <b>이상 수치가 감지되었습니다.</b>`
+
+    }, {
+      type: type[4],
+      timer: 8000,
+    });
+  }
 };

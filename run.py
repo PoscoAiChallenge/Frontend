@@ -13,7 +13,6 @@ from apps import create_app, db
 from flask import request
 import numpy as np
 from keras.models import load_model
-from flask_cors import CORS
 
 # WARNING: Don't run with debug turned on in production!
 DEBUG = (os.getenv('DEBUG', 'False') == 'True')
@@ -22,7 +21,6 @@ DEBUG = (os.getenv('DEBUG', 'False') == 'True')
 get_config_mode = 'Debug' if DEBUG else 'Production'
 
 try:
-
     # Load the configuration using the default values
     app_config = config_dict[get_config_mode.capitalize()]
 
@@ -30,7 +28,6 @@ except KeyError:
     exit('Error: Invalid <config_mode>. Expected values [Debug, Production] ')
 
 app = create_app(app_config)
-cors = CORS(app)
 Migrate(app, db)
 
 if not DEBUG:
@@ -41,12 +38,12 @@ if DEBUG:
     app.logger.info('DBMS        = ' + app_config.SQLALCHEMY_DATABASE_URI)
     app.logger.info('ASSETS_ROOT = ' + app_config.ASSETS_ROOT )
 
-@app.route('/asdf')
+@app.route('/predict')
 def predict():
     loaded_model = load_model('./model/best_model_site_all.h5')
     # Get the three GET arguments
-    arg1 = float(request.args.get('s'))
-    arg2 = float(request.args.get('v'))
+    arg1 = float(request.args.get('v'))
+    arg2 = float(request.args.get('s'))
     arg3 = float(request.args.get('w'))
     
     # Assuming your model expects input in the form of a NumPy array

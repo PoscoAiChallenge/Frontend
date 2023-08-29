@@ -25,6 +25,8 @@ class Config(object):
     GITHUB_ID      = os.getenv('GITHUB_ID')
     GITHUB_SECRET  = os.getenv('GITHUB_SECRET')
 
+    MAP_KEY = os.getenv("MAP_KEY")
+
     # Enable/Disable Github Social Login    
     if GITHUB_ID and GITHUB_SECRET:
          SOCIAL_AUTH_GITHUB  = True
