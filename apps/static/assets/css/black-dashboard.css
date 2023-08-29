@@ -11286,7 +11286,7 @@ table.tablesorter thead tr .headerSortDown {
   top: 0;
   height: 100vh; }
   .wrapper.wrapper-full-page {
-    min-height: 100vh;
+    min-height: 8px;
     height: auto; }
 
 .sidebar-wrapper ul li div.collapse ul li div.collapse ul li a,

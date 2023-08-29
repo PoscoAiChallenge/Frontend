@@ -1,8 +1,53 @@
 type = ['primary', 'info', 'success', 'warning', 'danger'];
+sectorA = [];
+sectorB = [];
 
 demo = {
-  initPickColor: function() {
-    $('.pick-class-label').click(function() {
+  getSectorAData: function () {
+    $.ajax({
+      url: "https://api.ye0ngjae.com/data",
+      type: "GET",
+      dataType: "json",
+      success: function (data) {
+        console.log(data);
+        for (var i = data.length - 120; i < data.length; i++) {
+          if (data[i].site == "1") {
+            for (var j = 0; j < sectorA.length; j++) {
+              if (sectorA[j].id == data[i].id) {
+                sectorA.splice(j, 1);
+              }
+            }
+            sectorA.push(data[i]);
+          }
+        }
+      },
+    });
+  },
+
+  getSectorBData: function () {
+    $.ajax({
+      url: "https://api.ye0ngjae.com/data",
+      type: "GET",
+      dataType: "json",
+      success: function (data) {
+        console.log(data);
+        for (var i = data.length - 120; i < data.length; i++) {
+          if (data[i].site == "2") {
+            for (var j = 0; j < sectorB.length; j++) {
+              if (sectorB[j].id == data[i].id) {
+                sectorB.splice(j, 1);
+              }
+            }
+            sectorB.push(data[i]);
+          }
+        }
+      },
+    });
+  },
+
+
+  initPickColor: function () {
+    $('.pick-class-label').click(function () {
       var new_class = $(this).attr('new-class');
       var old_class = $('#display-buttons').attr('data-class');
       var display_div = $('#display-buttons');
@@ -15,7 +60,7 @@ demo = {
     });
   },
 
-  initDocChart: function() {
+  initDocChart: function () {
     chartColor = "#FFFFFF";
 
     // General configuration for the charts with Line gradientStroke
@@ -106,7 +151,7 @@ demo = {
     });
   },
 
-  initDashboardPageCharts: function() {
+  initDashboardPageCharts: function () {
 
     gradientChartOptionsConfigurationWithTooltipBlue = {
       maintainAspectRatio: false,
@@ -300,7 +345,6 @@ demo = {
       }
     };
 
-
     gradientBarChartConfiguration = {
       maintainAspectRatio: false,
       legend: {
@@ -350,17 +394,15 @@ demo = {
     };
 
     var ctx = document.getElementById("chartLinePurple").getContext("2d");
-
     var gradientStroke = ctx.createLinearGradient(0, 230, 0, 50);
-
     gradientStroke.addColorStop(1, 'rgba(72,72,176,0.2)');
     gradientStroke.addColorStop(0.2, 'rgba(72,72,176,0.0)');
     gradientStroke.addColorStop(0, 'rgba(119,52,169,0)'); //purple colors
 
     var data = {
-      labels: ['JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'],
+      labels: ['7월', '8월', '9월', '10월', '11월', '12월'],
       datasets: [{
-        label: "Data",
+        label: "경고 횟수",
         fill: true,
         backgroundColor: gradientStroke,
         borderColor: '#d048b6',
@@ -374,7 +416,7 @@ demo = {
         pointHoverRadius: 4,
         pointHoverBorderWidth: 15,
         pointRadius: 4,
-        data: [80, 100, 70, 80, 120, 80],
+        data: [0, 40, 0, 0, 0, 0],
       }]
     };
 
@@ -394,9 +436,9 @@ demo = {
     gradientStroke.addColorStop(0, 'rgba(66,134,121,0)'); //green colors
 
     var data = {
-      labels: ['JUL', 'AUG', 'SEP', 'OCT', 'NOV'],
+      labels: ['7월', '8월', '9월', '10월', '11월', '12월'],
       datasets: [{
-        label: "My First dataset",
+        label: "강수량",
         fill: true,
         backgroundColor: gradientStroke,
         borderColor: '#00d6b4',
@@ -410,7 +452,7 @@ demo = {
         pointHoverRadius: 4,
         pointHoverBorderWidth: 15,
         pointRadius: 4,
-        data: [90, 27, 60, 12, 80],
+        data: [308.2, 346.7, 0, 0, 0, 0],
       }]
     };
 
@@ -418,14 +460,34 @@ demo = {
       type: 'line',
       data: data,
       options: gradientChartOptionsConfigurationWithTooltipGreen
-
     });
 
+    // -----------------------------------------------------------------------
 
+    // 10분 전 ~ time(현재 시간)까지 10초마다 시간을 chart_labels에 저장한다.
+    var chart_labels = [...Array(60).keys()].map((_, i) => {
+      let now = new Date();
+      now.setHours(now.getHours());
+      now.setMinutes(now.getMinutes() - 10);
+      now.setSeconds(now.getSeconds() + i * 10);
+      let hours = now.getHours().toString().padStart(2, '0');
+      let minutes = now.getMinutes().toString().padStart(2, '0');
+      let seconds = now.getSeconds().toString().padStart(2, '0');
+      let time = `${hours}:${minutes}:${seconds}`;
+      return time;
+    });
 
-    var chart_labels = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-    var chart_data = [100, 70, 90, 70, 85, 60, 75, 60, 90, 80, 110, 100];
+    /*
+    // chart_labels에 저장된 시간에 맞춰서 랜덤한 데이터를 chart_data에 저장한다.
+    var chart_data = [...Array(60).keys()].map((_, i) => {
+      return Math.floor(Math.random() * 50);
+    });
+    */
 
+    // chart_data 배열을 생성한다. sectorA에서 sound 추출한다.
+    var chart_data = [];
+    var sectorA_chart_data = [[], [], []];
+    var sectorB_chart_data = [[], [], []];
 
     var ctx = document.getElementById("chartBig1").getContext('2d');
 
@@ -439,7 +501,7 @@ demo = {
       data: {
         labels: chart_labels,
         datasets: [{
-          label: "My First dataset",
+          label: "진동",
           fill: true,
           backgroundColor: gradientStroke,
           borderColor: '#d346b1',
@@ -454,33 +516,211 @@ demo = {
           pointHoverBorderWidth: 15,
           pointRadius: 4,
           data: chart_data,
+        },
+        {
+          label: "소음",
+          fill: true,
+          backgroundColor: gradientStroke,
+          borderColor: '#ff89b9',
+          borderWidth: 2,
+          borderDash: [],
+          borderDashOffset: 0.0,
+          pointBackgroundColor: '#ff89b9',
+          pointBorderColor: 'rgba(255,255,255,0)',
+          pointHoverBackgroundColor: '#ff89b9',
+          pointBorderWidth: 20,
+          pointHoverRadius: 4,
+          pointHoverBorderWidth: 15,
+          pointRadius: 4,
+          data: chart_data,
+        },
+        {
+          label: "수압",
+          fill: true,
+          backgroundColor: gradientStroke,
+          borderColor: '#ffdab2',
+          borderWidth: 2,
+          borderDash: [],
+          borderDashOffset: 0.0,
+          pointBackgroundColor: '#ffdab2',
+          pointBorderColor: 'rgba(255,255,255,0)',
+          pointHoverBackgroundColor: '#ffdab2',
+          pointBorderWidth: 20,
+          pointHoverRadius: 4,
+          pointHoverBorderWidth: 15,
+          pointRadius: 4,
+          data: chart_data,
         }]
       },
       options: gradientChartOptionsConfigurationWithTooltipPurple
     };
     var myChartData = new Chart(ctx, config);
-    $("#0").click(function() {
-      var data = myChartData.config.data;
-      data.datasets[0].data = chart_data;
-      data.labels = chart_labels;
-      myChartData.update();
-    });
-    $("#1").click(function() {
-      var chart_data = [80, 120, 105, 110, 95, 105, 90, 100, 80, 95, 70, 120];
-      var data = myChartData.config.data;
-      data.datasets[0].data = chart_data;
-      data.labels = chart_labels;
+
+    /*
+    그래프 부분 추가 구현
+    AI가 예측한 값은 0과 1로 저장한 다음, 만약 데이터가 1일 경우 pointBackgroundColor를 FF0000으로 바꾼다.
+    */
+
+    // A 배관
+    $("#0").click(function () {
+      var sectorA_data = myChartData.config.data;
+      sectorA_data.datasets[0].borderColor = "#d346b1";
+      sectorA_data.datasets[0].pointBackgroundColor = "#d346b1";
+      sectorA_data.datasets[0].pointHoverBackgroundColor = "#d346b1";
+      sectorA_data.datasets[1].borderColor = "#ff89b9";
+      sectorA_data.datasets[1].pointBackgroundColor = "#ff89b9";
+      sectorA_data.datasets[1].pointHoverBackgroundColor = "#ff89b9";
+      sectorA_data.datasets[2].borderColor = "#ffdab2";
+      sectorA_data.datasets[2].pointBackgroundColor = "#ffdab2";
+      sectorA_data.datasets[2].pointHoverBackgroundColor = "#ffdab2";
+      sectorA_data.labels = chart_labels;
+
+      /*
+      chart_labels = [...Array(60).keys()].map((_, i) => {
+        let now = new Date();
+        now.setHours(now.getHours());
+        now.setMinutes(now.getMinutes() - 10);
+        now.setSeconds(now.getSeconds() + i * 10);
+        let hours = now.getHours().toString().padStart(2, '0');
+        let minutes = now.getMinutes().toString().padStart(2, '0');
+        let seconds = now.getSeconds().toString().padStart(2, '0');
+        let time = `${hours}:${minutes}:${seconds}`;
+        return time;
+      });
+      chart_data = [...Array(60).keys()].map((_, i) => {
+        return Math.floor(Math.random() * 50);
+      });
+      */
+
+      sectorA_chart_data = [[], [], []];
+      for (var i = 0; i < sectorA.length; i++) {
+        sectorA_chart_data[0].push(sectorA[i].vibration);
+        sectorA_chart_data[1].push(sectorA[i].sound);
+        sectorA_chart_data[2].push(sectorA[i].WaterPressure);
+      }
+
+      var sectorA_data = myChartData.config.data;
+      sectorA_data.datasets[0].data = sectorA_chart_data[0];
+      sectorA_data.datasets[1].data = sectorA_chart_data[1];
+      sectorA_data.datasets[2].data = sectorA_chart_data[2];
+      sectorA_data.labels = chart_labels;
       myChartData.update();
     });
 
-    $("#2").click(function() {
-      var chart_data = [60, 80, 65, 130, 80, 105, 90, 130, 70, 115, 60, 130];
+    $("#1").click(function () {
+      var sectorB_data = myChartData.config.data;
+      sectorB_data.datasets[0].borderColor = "#5d6dff";
+      sectorB_data.datasets[0].pointBackgroundColor = "#5d6dff";
+      sectorB_data.datasets[0].pointHoverBackgroundColor = "#5d6dff";
+      sectorB_data.datasets[1].borderColor = "#49dbff";
+      sectorB_data.datasets[1].pointBackgroundColor = "#49dbff";
+      sectorB_data.datasets[1].pointHoverBackgroundColor = "#49dbff";
+      sectorB_data.datasets[2].borderColor = "#5cfcfa";
+      sectorB_data.datasets[2].pointBackgroundColor = "#5cfcfa";
+      sectorB_data.datasets[2].pointHoverBackgroundColor = "#5cfcfa";
+      sectorB_data.labels = chart_labels;
+
+      /*
+      chart_labels = [...Array(60).keys()].map((_, i) => {
+        let now = new Date();
+        now.setHours(now.getHours());
+        now.setMinutes(now.getMinutes() - 10);
+        now.setSeconds(now.getSeconds() + i * 10);
+        let hours = now.getHours().toString().padStart(2, '0');
+        let minutes = now.getMinutes().toString().padStart(2, '0');
+        let seconds = now.getSeconds().toString().padStart(2, '0');
+        let time = `${hours}:${minutes}:${seconds}`;
+        return time;
+      });
+      chart_data = [...Array(60).keys()].map((_, i) => {
+        return Math.floor(Math.random() * 50);
+      });
+      */
+
+      sectorB_chart_data = [[], [], []];
+      for (var i = 0; i < sectorB.length; i++) {
+        sectorB_chart_data[0].push(sectorB[i].vibration);
+        sectorB_chart_data[1].push(sectorB[i].sound);
+        sectorB_chart_data[2].push(sectorB[i].WaterPressure);
+      }
+
+      var sectorB_data = myChartData.config.data;
+      sectorB_data.datasets[0].data = sectorB_chart_data[0];
+      sectorB_data.datasets[1].data = sectorB_chart_data[1];
+      sectorB_data.datasets[2].data = sectorB_chart_data[2];
+      sectorB_data.labels = chart_labels;
+      myChartData.update();
+
+      /*
+      // 30분 전 ~ time(현재 시간)까지 10초마다 시간을 chart_labels에 저장한다.
+      chart_labels = [...Array(180).keys()].map((_, i) => {
+        let now = new Date();
+        now.setHours(now.getHours());
+        now.setMinutes(now.getMinutes() - 30);
+        now.setSeconds(now.getSeconds() + i * 10);
+        let hours = now.getHours().toString().padStart(2, '0');
+        let minutes = now.getMinutes().toString().padStart(2, '0');
+        let seconds = now.getSeconds().toString().padStart(2, '0');
+        let time = `${hours}:${minutes}:${seconds}`;
+        return time;
+      });
+      chart_data = [...Array(180).keys()].map((_, i) => {
+        return Math.floor(Math.random() * 100);
+      });
+      var data = myChartData.config.data;
+      data.datasets[0].data = chart_data;
+      data.labels = chart_labels;
+      myChartData.update();
+      */
+    });
+
+    /*
+    // 1시간
+    $("#2").click(function () {
+      chart_labels = [...Array(360).keys()].map((_, i) => {
+        let now = new Date();
+        now.setHours(now.getHours() - 1);
+        now.setSeconds(now.getSeconds() + i * 10);
+        let hours = now.getHours().toString().padStart(2, '0');
+        let minutes = now.getMinutes().toString().padStart(2, '0');
+        let seconds = now.getSeconds().toString().padStart(2, '0');
+        let time = `${hours}:${minutes}:${seconds}`;
+        return time;
+      });
+   
+      chart_data = [...Array(360).keys()].map((_, i) => {
+        return Math.floor(Math.random() * 100);
+      });
+   
       var data = myChartData.config.data;
       data.datasets[0].data = chart_data;
       data.labels = chart_labels;
       myChartData.update();
     });
+    */
 
+    setInterval(function () {
+      chart_labels.shift();
+      chart_labels.push(chart_labels[chart_labels.length - 1]);
+      sectorA_chart_data[0].shift();
+      sectorA_chart_data[0].push(sectorA[sectorA.length - 1].vibration)
+      sectorA_chart_data[1].shift();
+      sectorA_chart_data[1].push(sectorA[sectorA.length - 1].sound)
+      sectorA_chart_data[2].shift();
+      sectorA_chart_data[2].push(sectorA[sectorA.length - 1].WaterPressure)
+      sectorB_chart_data[0].shift();
+      sectorB_chart_data[0].push(sectorB[sectorB.length - 1].vibration)
+      sectorB_chart_data[1].shift();
+      sectorB_chart_data[1].push(sectorB[sectorB.length - 1].sound)
+      sectorB_chart_data[2].shift();
+      sectorB_chart_data[2].push(sectorB[sectorB.length - 1].WaterPressure)
+      var data = myChartData.config.data;
+
+      data.labels = chart_labels;
+      myChartData.update();
+    }, 1000);
+
+    // -----------------------------------------------------------------------
 
     var ctx = document.getElementById("CountryChart").getContext("2d");
 
@@ -490,7 +730,6 @@ demo = {
     gradientStroke.addColorStop(0.4, 'rgba(29,140,248,0.0)');
     gradientStroke.addColorStop(0, 'rgba(29,140,248,0)'); //blue colors
 
-
     var myChart = new Chart(ctx, {
       type: 'bar',
       responsive: true,
@@ -498,9 +737,9 @@ demo = {
         display: false
       },
       data: {
-        labels: ['USA', 'GER', 'AUS', 'UK', 'RO', 'BR'],
+        labels: ['A', 'B'],
         datasets: [{
-          label: "Countries",
+          label: "영역",
           fill: true,
           backgroundColor: gradientStroke,
           hoverBackgroundColor: gradientStroke,
@@ -508,235 +747,261 @@ demo = {
           borderWidth: 2,
           borderDash: [],
           borderDashOffset: 0.0,
-          data: [53, 20, 10, 80, 100, 45],
+          data: [120, 120],
         }]
       },
       options: gradientBarChartConfiguration
     });
-
   },
 
-  initGoogleMaps: function() {
-    var myLatlng = new google.maps.LatLng(40.748817, -73.985428);
+  // -----------------------------------------------------------------------
+
+  initGoogleMaps: function () {
+    var myLatlng = new google.maps.LatLng(37.402887, 127.100100);
     var mapOptions = {
-      zoom: 13,
+      zoom: 15,
       center: myLatlng,
       scrollwheel: false, //we disable de scroll over the map, it is a really annoing when you scroll through page
+      /*
       styles: [{
-          "elementType": "geometry",
-          "stylers": [{
-            "color": "#1d2c4d"
-          }]
-        },
-        {
-          "elementType": "labels.text.fill",
-          "stylers": [{
-            "color": "#8ec3b9"
-          }]
-        },
-        {
-          "elementType": "labels.text.stroke",
-          "stylers": [{
-            "color": "#1a3646"
-          }]
-        },
-        {
-          "featureType": "administrative.country",
-          "elementType": "geometry.stroke",
-          "stylers": [{
-            "color": "#4b6878"
-          }]
-        },
-        {
-          "featureType": "administrative.land_parcel",
-          "elementType": "labels.text.fill",
-          "stylers": [{
-            "color": "#64779e"
-          }]
-        },
-        {
-          "featureType": "administrative.province",
-          "elementType": "geometry.stroke",
-          "stylers": [{
-            "color": "#4b6878"
-          }]
-        },
-        {
-          "featureType": "landscape.man_made",
-          "elementType": "geometry.stroke",
-          "stylers": [{
-            "color": "#334e87"
-          }]
-        },
-        {
-          "featureType": "landscape.natural",
-          "elementType": "geometry",
-          "stylers": [{
-            "color": "#023e58"
-          }]
-        },
-        {
-          "featureType": "poi",
-          "elementType": "geometry",
-          "stylers": [{
-            "color": "#283d6a"
-          }]
-        },
-        {
-          "featureType": "poi",
-          "elementType": "labels.text.fill",
-          "stylers": [{
-            "color": "#6f9ba5"
-          }]
-        },
-        {
-          "featureType": "poi",
-          "elementType": "labels.text.stroke",
-          "stylers": [{
-            "color": "#1d2c4d"
-          }]
-        },
-        {
-          "featureType": "poi.park",
-          "elementType": "geometry.fill",
-          "stylers": [{
-            "color": "#023e58"
-          }]
-        },
-        {
-          "featureType": "poi.park",
-          "elementType": "labels.text.fill",
-          "stylers": [{
-            "color": "#3C7680"
-          }]
-        },
-        {
-          "featureType": "road",
-          "elementType": "geometry",
-          "stylers": [{
-            "color": "#304a7d"
-          }]
-        },
-        {
-          "featureType": "road",
-          "elementType": "labels.text.fill",
-          "stylers": [{
-            "color": "#98a5be"
-          }]
-        },
-        {
-          "featureType": "road",
-          "elementType": "labels.text.stroke",
-          "stylers": [{
-            "color": "#1d2c4d"
-          }]
-        },
-        {
-          "featureType": "road.highway",
-          "elementType": "geometry",
-          "stylers": [{
-            "color": "#2c6675"
-          }]
-        },
-        {
-          "featureType": "road.highway",
-          "elementType": "geometry.fill",
-          "stylers": [{
-            "color": "#9d2a80"
-          }]
-        },
-        {
-          "featureType": "road.highway",
-          "elementType": "geometry.stroke",
-          "stylers": [{
-            "color": "#9d2a80"
-          }]
-        },
-        {
-          "featureType": "road.highway",
-          "elementType": "labels.text.fill",
-          "stylers": [{
-            "color": "#b0d5ce"
-          }]
-        },
-        {
-          "featureType": "road.highway",
-          "elementType": "labels.text.stroke",
-          "stylers": [{
-            "color": "#023e58"
-          }]
-        },
-        {
-          "featureType": "transit",
-          "elementType": "labels.text.fill",
-          "stylers": [{
-            "color": "#98a5be"
-          }]
-        },
-        {
-          "featureType": "transit",
-          "elementType": "labels.text.stroke",
-          "stylers": [{
-            "color": "#1d2c4d"
-          }]
-        },
-        {
-          "featureType": "transit.line",
-          "elementType": "geometry.fill",
-          "stylers": [{
-            "color": "#283d6a"
-          }]
-        },
-        {
-          "featureType": "transit.station",
-          "elementType": "geometry",
-          "stylers": [{
-            "color": "#3a4762"
-          }]
-        },
-        {
-          "featureType": "water",
-          "elementType": "geometry",
-          "stylers": [{
-            "color": "#0e1626"
-          }]
-        },
-        {
-          "featureType": "water",
-          "elementType": "labels.text.fill",
-          "stylers": [{
-            "color": "#4e6d70"
-          }]
-        }
+        "elementType": "geometry",
+        "stylers": [{
+          "color": "#1d2c4d"
+        }]
+      },
+      {
+        "elementType": "labels.text.fill",
+        "stylers": [{
+          "color": "#8ec3b9"
+        }]
+      },
+      {
+        "elementType": "labels.text.stroke",
+        "stylers": [{
+          "color": "#1a3646"
+        }]
+      },
+      {
+        "featureType": "administrative.country",
+        "elementType": "geometry.stroke",
+        "stylers": [{
+          "color": "#4b6878"
+        }]
+      },
+      {
+        "featureType": "administrative.land_parcel",
+        "elementType": "labels.text.fill",
+        "stylers": [{
+          "color": "#64779e"
+        }]
+      },
+      {
+        "featureType": "administrative.province",
+        "elementType": "geometry.stroke",
+        "stylers": [{
+          "color": "#4b6878"
+        }]
+      },
+      {
+        "featureType": "landscape.man_made",
+        "elementType": "geometry.stroke",
+        "stylers": [{
+          "color": "#334e87"
+        }]
+      },
+      {
+        "featureType": "landscape.natural",
+        "elementType": "geometry",
+        "stylers": [{
+          "color": "#023e58"
+        }]
+      },
+      {
+        "featureType": "poi",
+        "elementType": "geometry",
+        "stylers": [{
+          "color": "#283d6a"
+        }]
+      },
+      {
+        "featureType": "poi",
+        "elementType": "labels.text.fill",
+        "stylers": [{
+          "color": "#6f9ba5"
+        }]
+      },
+      {
+        "featureType": "poi",
+        "elementType": "labels.text.stroke",
+        "stylers": [{
+          "color": "#1d2c4d"
+        }]
+      },
+      {
+        "featureType": "poi.park",
+        "elementType": "geometry.fill",
+        "stylers": [{
+          "color": "#023e58"
+        }]
+      },
+      {
+        "featureType": "poi.park",
+        "elementType": "labels.text.fill",
+        "stylers": [{
+          "color": "#3C7680"
+        }]
+      },
+      {
+        "featureType": "road",
+        "elementType": "geometry",
+        "stylers": [{
+          "color": "#304a7d"
+        }]
+      },
+      {
+        "featureType": "road",
+        "elementType": "labels.text.fill",
+        "stylers": [{
+          "color": "#98a5be"
+        }]
+      },
+      {
+        "featureType": "road",
+        "elementType": "labels.text.stroke",
+        "stylers": [{
+          "color": "#1d2c4d"
+        }]
+      },
+      {
+        "featureType": "road.highway",
+        "elementType": "geometry",
+        "stylers": [{
+          "color": "#2c6675"
+        }]
+      },
+      {
+        "featureType": "road.highway",
+        "elementType": "geometry.fill",
+        "stylers": [{
+          "color": "#9d2a80"
+        }]
+      },
+      {
+        "featureType": "road.highway",
+        "elementType": "geometry.stroke",
+        "stylers": [{
+          "color": "#9d2a80"
+        }]
+      },
+      {
+        "featureType": "road.highway",
+        "elementType": "labels.text.fill",
+        "stylers": [{
+          "color": "#b0d5ce"
+        }]
+      },
+      {
+        "featureType": "road.highway",
+        "elementType": "labels.text.stroke",
+        "stylers": [{
+          "color": "#023e58"
+        }]
+      },
+      {
+        "featureType": "transit",
+        "elementType": "labels.text.fill",
+        "stylers": [{
+          "color": "#98a5be"
+        }]
+      },
+      {
+        "featureType": "transit",
+        "elementType": "labels.text.stroke",
+        "stylers": [{
+          "color": "#1d2c4d"
+        }]
+      },
+      {
+        "featureType": "transit.line",
+        "elementType": "geometry.fill",
+        "stylers": [{
+          "color": "#283d6a"
+        }]
+      },
+      {
+        "featureType": "transit.station",
+        "elementType": "geometry",
+        "stylers": [{
+          "color": "#3a4762"
+        }]
+      },
+      {
+        "featureType": "water",
+        "elementType": "geometry",
+        "stylers": [{
+          "color": "#0e1626"
+        }]
+      },
+      {
+        "featureType": "water",
+        "elementType": "labels.text.fill",
+        "stylers": [{
+          "color": "#4e6d70"
+        }]
+      }
       ]
+      */
     };
 
     var map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
+    /*
     var marker = new google.maps.Marker({
       position: myLatlng,
       title: "Hello World!"
     });
-
-    // To add the marker to the map, call setMap();
     marker.setMap(map);
-  },
+    */
 
-  showNotification: function(from, align) {
-    color = Math.floor((Math.random() * 4) + 1);
+    var sectorABox = new google.maps.Rectangle({
+      strokeColor: '#FF0000',
+      strokeOpacity: 0.7,
+      strokeWeight: 5,
+      fillColor: '#FF0000',
+      fillOpacity: 0.5,
+      map: map,
+      bounds: {
+        north: 37.4035,
+        south: 37.4025,
+        east: 127.101,
+        west: 127.094
+      },
+    });
+    sectorABox.setMap(map);
 
-    $.notify({
-      icon: "tim-icons icon-bell-55",
-      message: "Welcome to <b>Black Dashboard</b> - a beautiful freebie for every web developer."
-
-    }, {
-      type: type[color],
-      timer: 8000,
-      placement: {
-        from: from,
-        align: align
+    var sectorBBox = new google.maps.Rectangle({
+      strokeColor: '#0000FF',
+      strokeOpacity: 0.7,
+      strokeWeight: 5,
+      fillColor: '#0000FF',
+      fillOpacity: 0.5,
+      map: map,
+      bounds: {
+        north: 37.4035,
+        south: 37.4025,
+        east: 127.108,
+        west: 127.101
       }
     });
-  }
+    sectorBBox.setMap(map);
 
+    // sectorBBox 중심에 마커 생성
+    var sectorBBoxCenter = new google.maps.LatLng(37.403, 127.0975);
+    var marker = new google.maps.Marker({
+      position: sectorBBoxCenter,
+      animation: google.maps.Animation.BOUNCE,
+      icon: 'http://maps.google.com/mapfiles/kml/paddle/red-blank.png'
+    });
+    marker.setMap(map);
+  },
 };
