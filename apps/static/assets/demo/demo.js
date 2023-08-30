@@ -16,7 +16,6 @@ amount = [0, 40, 0, 0, 0, 0];
 해당 데이터의 근처 값이 반환되면 이상 감지로 판단한다. 그리고 alert(경고)를 출력한다.
 */
 
-
 demo = {
   getSectorAPredict: function () {
     $.ajax({
@@ -31,12 +30,12 @@ demo = {
 
         console.log(`Sector A: ${data}`);
         //만약 data가 [ 0.09055595 0.38549864 -0.10001237 0.17136654 0.37429774 -0.00075923] 값과 근처 값이라면 이상 감지로 판단한다.
-        if ((data[0] >= 0.09 && data[0] <= 0.11) &&
-          (data[1] >= 0.38 && data[1] <= 0.41) &&
-          (data[2] >= -0.11 && data[2] <= -0.09) &&
-          (data[3] >= 0.16 && data[3] <= 0.18) &&
-          (data[4] >= 0.37 && data[4] <= 0.39) &&
-          (data[5] >= -0.0008 && data[5] <= -0.0007)) {
+        if ((data[0] > 0.09 && data[0] < 0.10) &&
+          (data[1] > 0.38 && data[1] < 0.40) &&
+          (data[2] > -0.11 && data[2] < -0.01) &&
+          (data[3] > 0.16 && data[3] < 0.17) &&
+          (data[4] > 0.37 && data[4] < 0.38) &&
+          (data[5] > -0.0008 && data[5] < -0.0007)) {
           demo.sectorNoti("A");
         }
       },
@@ -70,7 +69,8 @@ demo = {
 
   getSectorData: function () {
     $.ajax({
-      url: "https://gist.githubusercontent.com/GreenScreen410/b458d9c5f1c5933a5a4a6c0e95a5f757/raw/bf4f33ea065d106c5dcb182364e357ec4d1c42e4/gistfile1.txt",
+      //url: "https://gist.githubusercontent.com/GreenScreen410/b458d9c5f1c5933a5a4a6c0e95a5f757/raw/bf4f33ea065d106c5dcb182364e357ec4d1c42e4/gistfile1.txt",
+      url: "https://api.ye0ngjae.com/data",
       type: "GET",
       dataType: "json",
       success: function (data) {
